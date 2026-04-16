@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SOS Prerelease Cheat Sheet — Secrets of Strixhaven</title>
+<meta name="description" content="MTG Secrets of Strixhaven Prerelease Cheat Sheet — Mechanics, Archetypes, Bombs, and Sealed Tips">
+<meta name="theme-color" content="#1a1520">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📜</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { background: #1a1520; overflow-x: hidden; }
+  #root { min-height: 100vh; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2535; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback } = React;
+
+const SOSCheatSheet = () => {
+  const [activeTab, setActiveTab] = useState("mechanics");
+  const [expandedCollege, setExpandedCollege] = useState(null);
+
+  const tabs = [
+    { id: "mechanics", label: "⚙️ Mechanics" },
+    { id: "archetypes", label: "🏫 Colleges" },
+    { id: "bombs", label: "💣 Bombs" },
+    { id: "avoid", label: "🚫 Avoid" },
+    { id: "tips", label: "📋 Tips" },
+  ];
+
+  const colleges = [
+    {
+      name: "Silverquill",
+      colors: "W/B",
+      colorDot: ["#F9FAF4", "#393B44"],
+      mechanic: "Repartee",
+      mechanicDesc: "Triggers when you cast an instant/sorcery that TARGETS a creature — yours or theirs. Removal spells count!",
+      strategy: "Balance creatures + targeted spells. Buff your own creatures or kill theirs — both trigger repartee.",
+      strengths: ["Flexible triggers (removal counts)", "Strong tempo plays", "Good evasion with flyers"],
+      weaknesses: ["Needs precise creature-to-spell ratio", "Payoffs can be mediocre without triggers", "Vulnerable if board is empty"],
+      signposts: ["Informed Inkwright — free 1/1 flyer per repartee trigger", "Stirring Hopesinger — team-wide +1/+1 counters + lifelink flyer", "Conciliator's Duelist"],
+      topCommons: ["Rapier Wit", "Interjection", "Rehearsed Debater", "Dig Site Inventory"],
+      rating: "B+",
+      ratingNote: "Solid archetype with flexible triggers"
+    },
+    {
+      name: "Witherbloom",
+      colors: "B/G",
+      colorDot: ["#393B44", "#00733E"],
+      mechanic: "Infusion",
+      mechanicDesc: "Bonus effect activates if you've gained ANY life this turn — even just 1 point is enough.",
+      strategy: "Build around cheap, repeatable lifegain enablers. Pest tokens, lifelink creatures, and drain effects all work.",
+      strengths: ["Easy to enable (1 life = full bonus)", "Strong midrange plan", "Much improved over original Witherbloom"],
+      weaknesses: ["Need lifegain sources in every hand", "Can be slow to set up", "Weak if lifegain pieces get removed"],
+      signposts: ["Vastlands Scavenger", "Pestbrood Sloth", "Bogwater Lumaret", "Teacher's Pest"],
+      topCommons: ["Noxious Newt", "Infirmary Healer", "Shattered Acolyte", "Leech Collector"],
+      rating: "B",
+      ratingNote: "Major improvement over original — real potential"
+    },
+    {
+      name: "Quandrix",
+      colors: "G/U",
+      colorDot: ["#00733E", "#0E68AB"],
+      mechanic: "Increment",
+      mechanicDesc: "Creature gets a +1/+1 counter whenever you spend mana on a spell greater than its power OR toughness (whichever is lower).",
+      strategy: "Play low-power creatures early, then cast expensive spells to pile on counters. Evasion effects seal the deal.",
+      strengths: ["Creatures scale into late game", "Synergizes with expensive spells naturally", "Great with ramp"],
+      weaknesses: ["Slow start", "Needs evasion to close games", "Vulnerable to removal on key creatures"],
+      signposts: ["Cuboid Colony", "Pensive Professor", "Encouraging Aviator", "Fractal Tender"],
+      topCommons: ["Studious First-Year", "Additive Evolution", "Chelonian Tackle", "Snarl Song"],
+      rating: "A-",
+      ratingNote: "One of the best — was top-tier last time too"
+    },
+    {
+      name: "Prismari",
+      colors: "U/R",
+      colorDot: ["#0E68AB", "#D3202A"],
+      mechanic: "Opus",
+      mechanicDesc: "Triggers on ANY instant/sorcery. If you SPENT 5+ mana casting it, you get the bigger bonus. No shortcuts — actual mana spent.",
+      strategy: "Build around expensive spells. Ramp or stall early, then dominate with splashy haymakers that trigger opus bonuses.",
+      strengths: ["Powerful late-game", "Big spells do double duty", "Access to great removal + card draw"],
+      weaknesses: ["Slow — vulnerable to aggro", "5-mana threshold is demanding", "Mana-hungry"],
+      signposts: ["Molten-Core Maestro", "Stadium Tidalmage", "Spectacular Skywhale", "Zaffai and the Tempests"],
+      topCommons: ["Unsubtle Mockery", "Tome Blast", "Artistic Process", "Goblin Glasswright"],
+      rating: "A",
+      ratingNote: "Expected best archetype — was dominant last time"
+    },
+    {
+      name: "Lorehold",
+      colors: "R/W",
+      colorDot: ["#D3202A", "#F9FAF4"],
+      mechanic: "Flashback",
+      mechanicDesc: "Cast spells from graveyard (usually at higher cost). Triggers 'cards leaving graveyard' abilities — the real Lorehold payoff.",
+      strategy: "Go wide with tokens, use flashback for value. Cards leaving your graveyard trigger your payoffs for extra advantage.",
+      strengths: ["Two-for-one value from flashback", "Goes wide effectively", "Cross-synergy with other colleges"],
+      weaknesses: ["Flashback costs can be expensive", "Graveyard hate shuts you down", "Was historically weak — needs good pulls"],
+      signposts: ["Hardened Academic", "Soaring Stoneglider", "Antiquities on the Loose", "Kirol, History Buff"],
+      topCommons: ["Practiced Offense", "Group Project", "Garrison Excavator", "Stone Docent"],
+      rating: "B-",
+      ratingNote: "Much better than original Lorehold — flashback is huge upgrade"
+    },
+  ];
+
+  const mechanics = [
+    { name: "Prepared Spells", icon: "📜", desc: "Creatures with a built-in instant/sorcery. Get the creature on board → it becomes 'prepared' → cast a COPY of the spell (triggers other mechanics!) → creature becomes unprepared.", tip: "These count as casting a spell, so they trigger repartee, opus, increment, etc. Huge synergy engine." },
+    { name: "Converge", icon: "🌈", desc: "Spells scale with number of colors of mana spent. More colors = bigger effect.", tip: "Don't be afraid to splash! Fixing is plentiful. Even 3 colors can make converge cards very strong." },
+    { name: "Paradigm", icon: "♾️", desc: "5 mythic Lessons (one per color). Cast once at full cost, then it recasts itself FREE every turn. You can still cast other spells.", tip: "These are game-enders. If you open one, build around reaching that mana cost. Restoration Seminar (W) is the standout." },
+    { name: "Repartee", icon: "🗡️", desc: "Silverquill (W/B). Triggers when you cast an instant/sorcery targeting ANY creature — yours or opponent's.", tip: "Removal spells trigger this! Combat tricks trigger this! Even prepared spells that target trigger this!" },
+    { name: "Infusion", icon: "🧪", desc: "Witherbloom (B/G). Bonus effect if you've gained life this turn. Just 1 life point is enough.", tip: "Lifelink creatures, Pest tokens dying, drain effects — all enable this. Shattered Acolyte is a great 2-drop enabler." },
+    { name: "Increment", icon: "📐", desc: "Quandrix (G/U). +1/+1 counter when mana spent on a spell exceeds creature's power or toughness (whichever is lower).", tip: "Low-power creatures with high toughness are ideal. A 0/4 gets a counter from ANY spell you cast." },
+    { name: "Opus", icon: "🎨", desc: "Prismari (U/R). Triggers on any instant/sorcery. If you spent 5+ mana, get the enhanced version.", tip: "No shortcuts — you must actually SPEND 5 mana. Cost reducers don't count toward the threshold." },
+    { name: "Flashback", icon: "🔄", desc: "Lorehold (R/W). Cast spells from graveyard (usually at higher cost). Triggers 'leaves graveyard' abilities.", tip: "The flashback cost is often 5+ mana, which also triggers opus if you're splashing blue!" },
+  ];
+
+  const bombsByTier = [
+    {
+      tier: "S-Tier — First-Pick Always",
+      color: "#FFD700",
+      cards: [
+        { name: "Emeritus of Truce", colors: "W", note: "3/3 + 1/1 flyer for 3 mana, PLUS Swords to Plowshares as prepared spell" },
+        { name: "Emeritus of Ideation", colors: "U", note: "Prepared spell is Ancestral Recall — draw 3 cards. Absurd." },
+        { name: "Restoration Seminar", colors: "W", note: "Paradigm mythic. Free creature from graveyard EVERY TURN." },
+        { name: "Antiquities on the Loose", colors: "W", note: "3 mana = two 2/2s. 6 mana = two 3/3s + counters. Insane value." },
+      ]
+    },
+    {
+      tier: "A-Tier — Windmill Slam",
+      color: "#C0C0C0",
+      cards: [
+        { name: "Emeritus of Woe", colors: "B", note: "Prepared spell is Demonic Tutor — search for any card" },
+        { name: "Germination Practicum", colors: "G", note: "Green paradigm mythic — A- tier bomb" },
+        { name: "Cyclonic Rift", colors: "U★", note: "Mystical Archive. Overloaded = you win the game." },
+        { name: "Winds of Abandon", colors: "W★", note: "Mystical Archive. One-sided board wipe when overloaded." },
+        { name: "Scheming Silvertongue", colors: "B", note: "Strong body + Sign in Blood as prepared spell" },
+        { name: "Echocasting Symposium", colors: "U", note: "Copy your spells — insane in spell-heavy format" },
+        { name: "Stirring Hopesinger", colors: "W", note: "Flying lifelinker that gives ALL creatures +1/+1 per repartee" },
+        { name: "Informed Inkwright", colors: "W", note: "Free 1/1 flyer tokens on every repartee trigger" },
+      ]
+    },
+    {
+      tier: "B+ Tier — Strong Pulls",
+      color: "#CD7F32",
+      cards: [
+        { name: "Molten-Core Maestro", colors: "R", note: "Red's best uncommon — strong opus payoff" },
+        { name: "Emeritus of Abundance", colors: "G", note: "Regrowth as prepared spell + solid body" },
+        { name: "Slumbering Trudge", colors: "G", note: "Massive stats, hard to deal with" },
+        { name: "Vastlands Scavenger", colors: "G", note: "Witherbloom all-star, great with infusion" },
+        { name: "Jadzi, Steward of Fate", colors: "U", note: "Legendary bomb — card advantage machine" },
+        { name: "Together as One", colors: "C", note: "Colorless — fits any deck, strong combat trick" },
+        { name: "Burst Lightning", colors: "R★", note: "Mystical Archive. Efficient removal at any stage" },
+        { name: "Impractical Joke", colors: "R", note: "High-impact uncommon, strong tempo" },
+      ]
+    },
+  ];
+
+  const avoidCards = [
+    { name: "Harsh Annotation", colors: "W", reason: "Kills a creature but gives them a 1/1 flyer — terrible trade" },
+    { name: "Choreographed Sparks", colors: "R", reason: "Unplayable — far too weak for any deck" },
+    { name: "Brain Freeze", colors: "U★", reason: "Mill doesn't exist in this format" },
+    { name: "Pyretic Ritual", colors: "R★", reason: "Ritual effects are useless in limited" },
+    { name: "Petrified Hamlet", colors: "Land", reason: "Worst land in the set — actively bad" },
+    { name: "Return to the Ranks", colors: "W★", reason: "Too narrow, not enough cheap targets" },
+    { name: "Crop Rotation", colors: "G★", reason: "No utility lands worth tutoring for" },
+    { name: "Glimpse of Nature", colors: "G★", reason: "Constructed combo piece, not a limited card" },
+    { name: "Triumph of the Hordes", colors: "G★", reason: "Infect doesn't work with limited board states" },
+    { name: "Library of Leng", colors: "Artifact★★", reason: "Special Guest trap — does nothing relevant" },
+    { name: "Flusterstorm", colors: "U★", reason: "Legacy card, near-useless in limited" },
+    { name: "Angel's Grace", colors: "W★", reason: "Delays losing by 1 turn — doesn't help you win" },
+    { name: "Force of Will", colors: "U★", reason: "Card disadvantage is brutal in limited — D+ at best" },
+  ];
+
+  const sealedTips = [
+    { icon: "📦", title: "Kit Contents", text: "5 Play Boosters + 1 college-themed booster + 1 promo rare. Build a 40-card deck (17 lands + 23 spells). You get 1 Mystical Archive card per booster." },
+    { icon: "🎯", title: "Deck Priorities", text: "Removal > Bombs > Evasion > Curve. This format is about instants and sorceries — they do DOUBLE DUTY triggering your mechanics." },
+    { icon: "🏫", title: "Pick Your College", text: "Sort by color first. Find your deepest 2-color pair — that's likely your college. Don't force a college; let your pool guide you." },
+    { icon: "🌈", title: "Splash Freely", text: "Fixing is abundant (slow lands, location lands, Terramorphic Expanse). Splashing a 3rd color for bombs or converge is encouraged." },
+    { icon: "📐", title: "Mana Curve", text: "Aim for: 2-3 two-drops, 4-5 three-drops, 3-4 four-drops, 2-3 five+ drops. Format is slower, but don't skip early plays." },
+    { icon: "⚡", title: "Spells Matter", text: "Every mechanic rewards casting instants/sorceries. Aim for 8-10+ non-creature spells. Prepared spells on creatures help pad this count." },
+    { icon: "🔗", title: "Cross-College Synergy", text: "Colleges pair well: Prismari's big spells trigger Quandrix's increment. Silverquill's targeted spells work with Lorehold's flashback. Don't be afraid to mix." },
+    { icon: "⏰", title: "Play Patiently", text: "Expected to be a SLOW format. Don't panic if opponent builds a board — your late-game spells and prepared spell value should catch up." },
+  ];
+
+  const colorEmoji = (c) => {
+    const map = { W: "☀️", U: "💧", B: "💀", R: "🔥", G: "🌿", C: "⚙️" };
+    return c.replace(/[WUBRGC]/g, ch => map[ch] || ch);
+  };
+
+  const s = {
+    page: {
+      fontFamily: "'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif",
+      background: "linear-gradient(170deg, #1a1520 0%, #0d1117 40%, #151a24 100%)",
+      color: "#e8dfd0",
+      minHeight: "100vh",
+    },
+    header: {
+      background: "linear-gradient(135deg, #2a1f3d 0%, #1a2744 50%, #1d3a2c 100%)",
+      borderBottom: "2px solid #c9a94e",
+      padding: "20px 16px 14px",
+      textAlign: "center",
+      position: "relative",
+      overflow: "hidden",
+    },
+    headerGlow: {
+      position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+      background: "radial-gradient(ellipse at 50% 0%, rgba(201,169,78,0.15) 0%, transparent 70%)",
+      pointerEvents: "none",
+    },
+    subtitle: { fontSize: "11px", letterSpacing: "4px", textTransform: "uppercase", color: "#c9a94e", marginBottom: "4px", position: "relative" },
+    title: {
+      fontSize: "28px", fontWeight: "700", margin: "0 0 2px",
+      background: "linear-gradient(135deg, #f0e6c8, #c9a94e)",
+      WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+      letterSpacing: "1px", position: "relative",
+    },
+    date: { fontSize: "12px", color: "#8a8090", position: "relative" },
+    tabBar: {
+      display: "flex", gap: "0", borderBottom: "1px solid #2a2535",
+      background: "#13111a", position: "sticky", top: 0, zIndex: 10,
+      overflowX: "auto", WebkitOverflowScrolling: "touch",
+    },
+    content: { padding: "16px", maxWidth: "720px", margin: "0 auto" },
+    card: {
+      background: "linear-gradient(135deg, #1a1726, #161c26)",
+      border: "1px solid #2a2535",
+      borderRadius: "8px",
+      padding: "12px",
+      marginBottom: "8px",
+    },
+    tipBox: {
+      fontSize: "12px", color: "#c9a94e", background: "rgba(201,169,78,0.08)",
+      padding: "6px 8px", borderRadius: "4px", borderLeft: "2px solid #c9a94e",
+    },
+    goldBox: {
+      background: "rgba(201,169,78,0.08)", border: "1px solid #c9a94e33",
+      borderRadius: "8px", padding: "12px",
+    },
+    redBox: {
+      background: "rgba(200,80,80,0.06)", border: "1px solid rgba(200,80,80,0.2)",
+      borderRadius: "8px", padding: "12px",
+    },
+    sectionHeader: {
+      fontSize: "18px", fontWeight: "700", color: "#e8dfd0",
+      margin: "0 0 8px", paddingBottom: "6px",
+      borderBottom: "1px solid #c9a94e44",
+    },
+    muted: { fontSize: "13px", color: "#9a91a8", lineHeight: "1.5", margin: "0 0 12px" },
+  };
+
+  const tabStyle = (isActive) => ({
+    flex: "1 0 auto", padding: "10px 10px",
+    background: isActive ? "#1e1a2e" : "transparent",
+    color: isActive ? "#c9a94e" : "#6a6278",
+    border: "none",
+    borderBottom: isActive ? "2px solid #c9a94e" : "2px solid transparent",
+    fontSize: "11px", fontWeight: isActive ? "700" : "500",
+    cursor: "pointer", letterSpacing: "0.3px",
+    fontFamily: "inherit", whiteSpace: "nowrap",
+  });
+
+  return (
+    <div style={s.page}>
+      {/* Header */}
+      <div style={s.header}>
+        <div style={s.headerGlow} />
+        <div style={s.subtitle}>MTG Pre-Release Cheat Sheet</div>
+        <h1 style={s.title}>Secrets of Strixhaven</h1>
+        <div style={s.date}>Sealed Format · April 17–23, 2026</div>
+      </div>
+
+      {/* Tabs */}
+      <div style={s.tabBar}>
+        {tabs.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={tabStyle(activeTab === tab.id)}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={s.content}>
+
+        {/* ═══ MECHANICS ═══ */}
+        {activeTab === "mechanics" && (
+          <div>
+            <h2 style={s.sectionHeader}>Set Mechanics Overview</h2>
+            <p style={s.muted}>
+              SOS is all about instants & sorceries. Every college mechanic rewards casting them. Prepared spells on creatures count as casting spells — this is the glue that holds the set together.
+            </p>
+            {mechanics.map((m, i) => (
+              <div key={i} style={s.card}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span style={{ fontSize: "18px" }}>{m.icon}</span>
+                  <span style={{ fontSize: "15px", fontWeight: "700", color: "#e8dfd0" }}>{m.name}</span>
+                </div>
+                <p style={{ fontSize: "13px", color: "#b8b0c4", lineHeight: "1.5", margin: "0 0 6px" }}>{m.desc}</p>
+                <div style={s.tipBox}>💡 {m.tip}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ═══ COLLEGES ═══ */}
+        {activeTab === "archetypes" && (
+          <div>
+            <h2 style={s.sectionHeader}>The Five Colleges</h2>
+            <p style={s.muted}>
+              Tap a college to expand. Cross-college decks (3+ colors) are viable — fixing is abundant and mechanics synergize across pairs.
+            </p>
+
+            {/* Power Ranking */}
+            <div style={{...s.card, marginBottom: "16px"}}>
+              <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px", color: "#6a6278", marginBottom: "8px" }}>
+                Projected Power Ranking
+              </div>
+              {[
+                { name: "Prismari", rating: "A", w: "95%" },
+                { name: "Quandrix", rating: "A-", w: "88%" },
+                { name: "Silverquill", rating: "B+", w: "78%" },
+                { name: "Witherbloom", rating: "B", w: "70%" },
+                { name: "Lorehold", rating: "B-", w: "62%" },
+              ].map((r, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "12px", width: "74px", color: "#b8b0c4" }}>{r.name}</span>
+                  <div style={{ flex: 1, height: "14px", background: "#0d0f16", borderRadius: "3px", overflow: "hidden" }}>
+                    <div style={{
+                      width: r.w, height: "100%",
+                      background: `linear-gradient(90deg, #c9a94e, ${i < 2 ? '#e6c55a' : '#8a7a3e'})`,
+                      borderRadius: "3px",
+                    }} />
+                  </div>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#c9a94e", width: "24px" }}>{r.rating}</span>
+                </div>
+              ))}
+            </div>
+
+            {colleges.map((college, idx) => {
+              const isOpen = expandedCollege === idx;
+              return (
+                <div key={idx} style={{
+                  ...s.card,
+                  border: `1px solid ${isOpen ? '#c9a94e44' : '#2a2535'}`,
+                  padding: 0, overflow: "hidden",
+                }}>
+                  <button
+                    onClick={() => setExpandedCollege(isOpen ? null : idx)}
+                    style={{
+                      width: "100%", padding: "12px", background: "none", border: "none",
+                      color: "#e8dfd0", cursor: "pointer", textAlign: "left",
+                      display: "flex", alignItems: "center", gap: "10px",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "3px" }}>
+                      {college.colorDot.map((c, ci) => (
+                        <div key={ci} style={{
+                          width: "18px", height: "18px", borderRadius: "50%",
+                          background: c, border: "1px solid #555",
+                        }} />
+                      ))}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ fontSize: "16px", fontWeight: "700" }}>{college.name}</span>
+                      <span style={{ fontSize: "12px", color: "#8a8090", marginLeft: "8px" }}>
+                        {college.colors} · {college.mechanic}
+                      </span>
+                    </div>
+                    <span style={{
+                      fontSize: "14px", fontWeight: "700", color: "#c9a94e",
+                      background: "rgba(201,169,78,0.1)", padding: "2px 8px", borderRadius: "4px",
+                    }}>
+                      {college.rating}
+                    </span>
+                    <span style={{ color: "#6a6278", fontSize: "16px", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</span>
+                  </button>
+
+                  {isOpen && (
+                    <div style={{ padding: "0 12px 12px" }}>
+                      <div style={{...s.tipBox, marginBottom: "10px"}}>
+                        <strong>{college.mechanic}:</strong> {college.mechanicDesc}
+                      </div>
+
+                      <p style={{ fontSize: "13px", color: "#b8b0c4", lineHeight: "1.5", margin: "0 0 10px" }}>
+                        <strong style={{ color: "#e8dfd0" }}>Strategy:</strong> {college.strategy}
+                      </p>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "10px" }}>
+                        <div style={{ background: "rgba(80,200,80,0.06)", padding: "8px", borderRadius: "4px", border: "1px solid rgba(80,200,80,0.15)" }}>
+                          <div style={{ fontSize: "11px", color: "#5c5", fontWeight: "700", marginBottom: "4px" }}>✓ STRENGTHS</div>
+                          {college.strengths.map((item, si) => (
+                            <div key={si} style={{ fontSize: "12px", color: "#a8c8a8", marginBottom: "2px" }}>• {item}</div>
+                          ))}
+                        </div>
+                        <div style={{ background: "rgba(200,80,80,0.06)", padding: "8px", borderRadius: "4px", border: "1px solid rgba(200,80,80,0.15)" }}>
+                          <div style={{ fontSize: "11px", color: "#c55", fontWeight: "700", marginBottom: "4px" }}>✗ WEAKNESSES</div>
+                          {college.weaknesses.map((item, wi) => (
+                            <div key={wi} style={{ fontSize: "12px", color: "#c8a8a8", marginBottom: "2px" }}>• {item}</div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px", color: "#6a6278", marginBottom: "4px" }}>
+                        Key Signpost Cards
+                      </div>
+                      {college.signposts.map((item, si) => (
+                        <div key={si} style={{
+                          fontSize: "12px", color: "#d4c8a0", padding: "3px 0",
+                          borderBottom: si < college.signposts.length - 1 ? "1px solid #1a1726" : "none",
+                        }}>
+                          ★ {item}
+                        </div>
+                      ))}
+
+                      <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px", color: "#6a6278", margin: "10px 0 4px" }}>
+                        Top Commons to Draft
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        {college.topCommons.map((c, ci) => (
+                          <span key={ci} style={{
+                            fontSize: "11px", background: "#1e1a2e", color: "#b8b0c4",
+                            padding: "3px 8px", borderRadius: "12px", border: "1px solid #2a2535",
+                          }}>
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ═══ BOMBS ═══ */}
+        {activeTab === "bombs" && (
+          <div>
+            <h2 style={s.sectionHeader}>Bombs & Top Picks by Tier</h2>
+            <p style={s.muted}>
+              ★ = Mystical Archive card (1 per booster). These are the cards you build around if you open them.
+            </p>
+            {bombsByTier.map((tier, ti) => (
+              <div key={ti} style={{ marginBottom: "16px" }}>
+                <div style={{
+                  fontSize: "13px", fontWeight: "700", color: tier.color,
+                  padding: "6px 0", borderBottom: `1px solid ${tier.color}44`,
+                  marginBottom: "8px", letterSpacing: "0.5px",
+                }}>
+                  {tier.tier}
+                </div>
+                {tier.cards.map((card, ci) => (
+                  <div key={ci} style={{
+                    display: "flex", gap: "8px", padding: "8px",
+                    background: ci % 2 === 0 ? "rgba(26,23,38,0.6)" : "transparent",
+                    borderRadius: "4px",
+                  }}>
+                    <div style={{ minWidth: "28px", fontSize: "12px", textAlign: "center" }}>
+                      {colorEmoji(card.colors.replace("★", ""))}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "13px", fontWeight: "700", color: "#e8dfd0" }}>
+                        {card.name} {card.colors.includes("★") && <span style={{ color: "#c9a94e", fontSize: "11px" }}>★ Archive</span>}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#8a8090", lineHeight: "1.4" }}>{card.note}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            <div style={{...s.goldBox, marginTop: "8px"}}>
+              <div style={{ fontSize: "13px", fontWeight: "700", color: "#c9a94e", marginBottom: "4px" }}>
+                🏆 The Emeritus Cycle — Know These Cards
+              </div>
+              <p style={{ fontSize: "12px", color: "#b8b0c4", lineHeight: "1.5", margin: 0 }}>
+                Each color has an Emeritus creature with a classic Alpha spell as its prepared spell.
+                Truce (W) = Swords to Plowshares, Ideation (U) = Ancestral Recall,
+                Woe (B) = Demonic Tutor, Conflict (R) = Lightning Bolt,
+                Abundance (G) = Regrowth. ALL are first-pickable.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ AVOID ═══ */}
+        {activeTab === "avoid" && (
+          <div>
+            <h2 style={s.sectionHeader}>Cards to Avoid</h2>
+            <p style={s.muted}>
+              These look tempting but underperform in Sealed/Draft. ★ = Mystical Archive, ★★ = Special Guest. Famous names ≠ limited playable.
+            </p>
+            {avoidCards.map((card, i) => (
+              <div key={i} style={{
+                display: "flex", gap: "8px", padding: "8px",
+                background: i % 2 === 0 ? "rgba(200,80,80,0.04)" : "transparent",
+                borderRadius: "4px",
+                borderLeft: "2px solid #c5555544",
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#d4a0a0" }}>
+                    {card.name} <span style={{ fontSize: "11px", color: "#6a6278" }}>({card.colors})</span>
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#8a8090", lineHeight: "1.4" }}>{card.reason}</div>
+                </div>
+                <div style={{
+                  fontSize: "10px", color: "#c55", fontWeight: "700",
+                  background: "rgba(200,80,80,0.1)", padding: "2px 6px",
+                  borderRadius: "4px", alignSelf: "flex-start", whiteSpace: "nowrap",
+                }}>
+                  TRAP
+                </div>
+              </div>
+            ))}
+
+            <div style={{...s.redBox, marginTop: "12px"}}>
+              <div style={{ fontSize: "13px", fontWeight: "700", color: "#d4a0a0", marginBottom: "4px" }}>
+                ⚠️ Mystical Archive Trap Warning
+              </div>
+              <p style={{ fontSize: "12px", color: "#b8b0c4", lineHeight: "1.5", margin: 0 }}>
+                Many iconic Constructed staples (Force of Will, Flusterstorm, Pyretic Ritual, Brain Freeze) are near-unplayable in Limited.
+                Don't let name recognition fool you — evaluate every card for THIS format, not its Legacy reputation.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ TIPS ═══ */}
+        {activeTab === "tips" && (
+          <div>
+            <h2 style={s.sectionHeader}>Sealed Deckbuilding Tips</h2>
+            {sealedTips.map((tip, i) => (
+              <div key={i} style={s.card}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span style={{ fontSize: "18px" }}>{tip.icon}</span>
+                  <span style={{ fontSize: "14px", fontWeight: "700", color: "#e8dfd0" }}>{tip.title}</span>
+                </div>
+                <p style={{ fontSize: "13px", color: "#b8b0c4", lineHeight: "1.5", margin: 0 }}>{tip.text}</p>
+              </div>
+            ))}
+
+            <div style={{...s.goldBox, marginTop: "8px"}}>
+              <div style={{ fontSize: "13px", fontWeight: "700", color: "#c9a94e", marginBottom: "6px" }}>
+                📋 Quick Deckbuilding Checklist
+              </div>
+              {[
+                "Sort all cards by color, then identify deepest 2-color pair",
+                "Pull ALL removal spells — these are your most important cards",
+                "Identify bombs/rares that pull you toward a college",
+                "Check for prepared spell creatures — count them as half-spell",
+                "Ensure 15-18 creatures + 5-8 non-creature spells",
+                "Include 17 lands (16 if very low curve, 18 if splashing)",
+                "Pick up ALL dual lands and fixing in your colors",
+                "Cut your weakest cards — better a tight 40 than a padded 45",
+              ].map((item, i) => (
+                <div key={i} style={{
+                  fontSize: "12px", color: "#b8b0c4", padding: "4px 0",
+                  borderBottom: i < 7 ? "1px solid #1e1a2e" : "none",
+                  display: "flex", gap: "6px",
+                }}>
+                  <span style={{ color: "#c9a94e", fontWeight: "700" }}>☐</span> {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        textAlign: "center", padding: "16px",
+        fontSize: "10px", color: "#4a4258",
+        borderTop: "1px solid #1e1a2e",
+      }}>
+        Sources: Draftsim (Set Review & Prerelease Guide) · Card Game Base (Tier List) · The Gamer · MTG Rocks
+        <br/>Data compiled pre-release — adjust based on gameplay experience
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.render(<SOSCheatSheet />, document.getElementById('root'));
+</script>
+</body>
+</html>
